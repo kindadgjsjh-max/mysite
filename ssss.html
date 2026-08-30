@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой сайт</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #FFFFFF;
+            color: #1A1A1A;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .clock-widget {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .clock-time {
+            font-size: 1.4rem;
+            font-weight: 900;
+        }
+        .clock-date {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+        
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 80px;
+            margin-bottom: 35px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .tg-link {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #FFF;
+            background: #242424;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 600px;
+            align-items: center;
+            gap: 25px;
+        }
+        
+        .image-box {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+        .image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .audio-player {
+            display: flex;
+            align-items: center;
+            background: #1A1A1A;
+            color: #FFF;
+            padding: 12px 28px;
+            border-radius: 30px;
+            cursor: pointer;
+            border: 1px solid #333;
+            user-select: none;
+            transition: 0.2s;
+        }
+        .audio-player:hover {
+            transform: scale(1.03);
+        }
+        .play-icon {
+            font-size: 1.2rem;
+            margin-right: 12px;
+        }
+        .player-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           РУЛЕТКА
+           ========================================================= */
+        .roulette-container {
+            width: 100%;
+            background: #1A1A1A;
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid #333;
+            color: #FFF;
+        }
+        
+        .roulette-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .roulette-title {
+            font-size: 0.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+        }
+        .roulette-balance {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #4A9EFF;
+        }
+        .roulette-balance span {
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+        
+        .roulette-display {
+            background: #0A0A0A;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .roulette-percent {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #4A9EFF;
+            transition: color 0.3s ease;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+        
+        .roulette-percent.win {
+            color: #4CAF50;
+            animation: winPulse 0.5s ease 3;
+        }
+        .roulette-percent.lose {
+            color: #FF6B6B;
+            animation: loseShake 0.5s ease 2;
+        }
+        
+        .roulette-percent.spinning {
+            animation: none;
+            color: #FFD700;
+        }
+        
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        @keyframes loseShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .roulette-result {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 8px;
+            min-height: 30px;
+            opacity: 0.9;
+        }
+        .roulette-result.win {
+            color: #4CAF50;
+        }
+        .roulette-result.lose {
+            color: #FF6B6B;
+        }
+        .roulette-result.info {
+            color: #FFD700;
+        }
+        
+        .spin-indicator {
+            display: none;
+            font-size: 0.8rem;
+            color: #FFD700;
+            margin-top: 5px;
+            animation: blink 0.5s ease infinite alternate;
+        }
+        .spin-indicator.active {
+            display: block;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .roulette-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .roulette-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: Arial, sans-serif;
+        }
+        .roulette-btn:hover {
+            transform: translateY(-2px);
+        }
+        .roulette-btn:active {
+            transform: scale(0.95);
+        }
+        .roulette-btn.spin {
+            background: linear-gradient(135deg, #4A9EFF, #7B5CF5);
+            color: #FFF;
+            padding: 14px 50px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(74, 158, 255, 0.3);
+        }
+        .roulette-btn.spin:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 30px rgba(74, 158, 255, 0.5);
+        }
+        .roulette-btn.spin:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .roulette-btn.bet {
+            background: #333;
+            color: #FFF;
+            min-width: 50px;
+            border-radius: 8px;
+        }
+        .roulette-btn.bet:hover {
+            background: #444;
+        }
+        .roulette-btn.bet.active {
+            background: #4A9EFF;
+        }
+        .roulette-btn.reset {
+            background: transparent;
+            color: #FF6B6B;
+            border: 1px solid #FF6B6B;
+            border-radius: 8px;
+        }
+        .roulette-btn.reset:hover {
+            background: #FF6B6B;
+            color: #FFF;
+        }
+        
+        .roulette-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid #333;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .roulette-stats span {
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           ИГРА
+           ========================================================= */
+        .dino-game {
+            width: 100%;
+            height: 230px;
+            background: #FFF;
+            border: 2px solid #1A1A1A;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .game-title {
+            position: absolute;
+            top: 12px;
+            left: 18px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            opacity: 0.5;
+            z-index: 5;
+        }
+        .score {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            z-index: 5;
+        }
+        .game-ground {
+            position: absolute;
+            left: 0;
+            bottom: 37px;
+            width: 100%;
+            height: 2px;
+            background: #1A1A1A;
+            opacity: 0.8;
+        }
+        .dino {
+            position: absolute;
+            left: 45px;
+            bottom: 37px;
+            width: 30px;
+            height: 38px;
+            z-index: 3;
+            transition: bottom 0.15s;
+        }
+        .dino-body {
+            position: absolute;
+            width: 22px;
+            height: 26px;
+            right: 0;
+            bottom: 0;
+            background: #1A1A1A;
+            border-radius: 5px 9px 3px 3px;
+        }
+        .dino-head {
+            position: absolute;
+            width: 20px;
+            height: 18px;
+            right: 0;
+            top: 0;
+            background: #1A1A1A;
+            border-radius: 5px 10px 4px 4px;
+        }
+        .dino-head::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 4px;
+            right: -5px;
+            bottom: 2px;
+            background: #1A1A1A;
+            border-radius: 0 3px 3px 0;
+        }
+        .dino-head::before {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            right: 4px;
+            top: 4px;
+            background: #FFF;
+            border-radius: 50%;
+        }
+        .dino-leg {
+            position: absolute;
+            width: 5px;
+            height: 11px;
+            bottom: -7px;
+            background: #1A1A1A;
+            border-radius: 0 0 3px 3px;
+        }
+        .dino-leg.left { left: 4px; }
+        .dino-leg.right { right: 2px; }
+        .dino-tail {
+            position: absolute;
+            width: 14px;
+            height: 6px;
+            left: -10px;
+            bottom: 7px;
+            background: #1A1A1A;
+            transform: rotate(-25deg);
+            border-radius: 5px 0 0 5px;
+        }
+        .dino.jumping {
+            bottom: 100px !important;
+            transition: bottom 0.35s;
+        }
+        .cactus {
+            position: absolute;
+            right: -40px;
+            bottom: 37px;
+            width: 15px;
+            height: 30px;
+            background: #1A1A1A;
+            border-radius: 5px 5px 2px 2px;
+            z-index: 2;
+        }
+        .cactus::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 11px;
+            width: 8px;
+            height: 5px;
+            background: #1A1A1A;
+            border-radius: 5px 0 0 5px;
+        }
+        .cactus::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 6px;
+            width: 7px;
+            height: 5px;
+            background: #1A1A1A;
+            border-radius: 0 5px 5px 0;
+        }
+        .game-message {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .game-message-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .game-message-subtitle {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+        .restart-button {
+            display: none;
+            margin-top: 12px;
+            border: 1px solid #1A1A1A;
+            background: #1A1A1A;
+            color: #FFF;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            pointer-events: auto;
+            position: relative;
+            z-index: 20;
+        }
+        .restart-button:hover {
+            transform: scale(1.05);
+        }
+        .cloud {
+            position: absolute;
+            width: 45px;
+            height: 8px;
+            border-radius: 20px;
+            background: #1A1A1A;
+            opacity: 0.08;
+        }
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: #1A1A1A;
+            border-radius: 50%;
+        }
+        .cloud::before {
+            width: 18px;
+            height: 18px;
+            left: 7px;
+            bottom: 0;
+        }
+        .cloud::after {
+            width: 13px;
+            height: 13px;
+            right: 7px;
+            bottom: 0;
+        }
+        #cloud1 { top: 55px; left: 35%; }
+        #cloud2 { top: 85px; left: 75%; transform: scale(0.7); }
+
+        @media (max-width: 600px) {
+            .clock-widget {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+            .header-container {
+                margin-top: 10px;
+            }
+            .dino-game {
+                height: 210px;
+            }
+            .dino {
+                left: 30px;
+            }
+            .dino.jumping {
+                bottom: 85px !important;
+            }
+            .roulette-percent {
+                font-size: 3.5rem;
+            }
+            .roulette-controls {
+                gap: 5px;
+            }
+            .roulette-btn {
+                padding: 8px 12px;
+                font-size: 0.7rem;
+            }
+            .roulette-btn.spin {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+            .roulette-stats {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Часы -->
+    <div class="clock-widget">
+        <div style="cursor:pointer;" id="theme-toggle">🌓</div>
+        <div>
+            <div class="clock-time" id="time">00:00:00</div>
+            <div class="clock-date" id="date">загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Шапка -->
+    <div class="header-container">
+        <h1>White</h1>
+        <a href="https://t.me" target="_blank" class="tg-link">@weuwood</a>
+    </div>
+    
+    <!-- Контент -->
+    <div class="main-content">
+        <div class="image-box">
+            <!-- ======= ЗДЕСЬ ВАША НОВАЯ КАРТИНКА ======= -->
+            <img src="https://i.pinimg.com/736x/80/97/39/809739c13dd577a2b8118695b4be6ac0.jpg" alt="Картинка" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        
+        <audio id="bg-music" loop></audio>
+        <div class="audio-player" id="player-btn">
+            <span class="play-icon" id="play-icon">▶</span>
+            <span class="player-text" id="player-text">Включить музыку</span>
+        </div>
+
+        <!-- РУЛЕТКА -->
+        <div class="roulette-container">
+            <div class="roulette-header">
+                <span class="roulette-title">🎰 КРУТИЛКА</span>
+                <span class="roulette-balance" id="balance-display">1000 <span>монет</span></span>
+            </div>
+
+            <div class="roulette-display">
+                <div class="roulette-percent" id="roulette-percent">0%</div>
+                <div class="roulette-result" id="roulette-result">Нажми крутить</div>
+                <div class="spin-indicator" id="spin-indicator">⏳ КРУЧУ...</div>
+            </div>
+
+            <div class="roulette-controls">
+                <button class="roulette-btn bet" data-bet="10">10</button>
+                <button class="roulette-btn bet active" data-bet="50">50</button>
+                <button class="roulette-btn bet" data-bet="100">100</button>
+                <button class="roulette-btn bet" data-bet="250">250</button>
+                <button class="roulette-btn bet" data-bet="500">500</button>
+                <button class="roulette-btn reset" id="reset-balance">Сброс</button>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:center; margin-bottom:12px;">
+                <button class="roulette-btn spin" id="spin-btn">🎰 КРУТИТЬ</button>
+            </div>
+
+            <div class="roulette-stats">
+                <span>🎯 Выигрыши: <span id="win-count">0</span></span>
+                <span>💔 Проигрыши: <span id="lose-count">0</span></span>
+                <span>📊 Всего: <span id="total-spins">0</span></span>
+                <span>🏆 Лучший %: <span id="best-percent">0%</span></span>
+            </div>
+        </div>
+
+        <!-- ИГРА -->
+        <div class="dino-game" id="dino-game">
+            <div class="game-title">DINO RUN</div>
+            <div class="score" id="score-display">00000</div>
+            <div class="cloud" id="cloud1"></div>
+            <div class="cloud" id="cloud2"></div>
+            <div class="game-ground"></div>
+            <div class="dino" id="dino">
+                <div class="dino-tail"></div>
+                <div class="dino-body"></div>
+                <div class="dino-head"></div>
+                <div class="dino-leg left"></div>
+                <div class="dino-leg right"></div>
+            </div>
+            <div class="cactus" id="cactus"></div>
+            <div class="game-message" id="game-message">
+                <div class="game-message-title" id="game-message-title">Нажми SPACE</div>
+                <div class="game-message-subtitle" id="game-message-subtitle">или кликни по игре, чтобы начать</div>
+                <button class="restart-button" id="restart-button">Играть снова</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================
+        // ТЕМА
+        // =========================================================
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const body = document.body;
+            if (body.style.background === 'rgb(18, 18, 18)') {
+                body.style.background = '#FFFFFF';
+                body.style.color = '#1A1A1A';
+            } else {
+                body.style.background = '#121212';
+                body.style.color = '#F5F5F5';
+            }
+        });
+
+        // =========================================================
+        // ЧАСЫ
+        // =========================================================
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toLocaleTimeString('ru-RU');
+            document.getElementById('date').textContent = now.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // =========================================================
+        // МУЗЫКА
+        // =========================================================
+        const music = document.getElementById('bg-music');
+        const playerBtn = document.getElementById('player-btn');
+        const playIcon = document.getElementById('play-icon');
+        const playerText = document.getElementById('player-text');
+        let isPlaying = false;
+
+        playerBtn.addEventListener('click', function() {
+            if (!isPlaying) {
+                music.src = 'song.mp3';
+                music.play()
+                    .then(() => {
+                        isPlaying = true;
+                        playIcon.textContent = '⏸';
+                        playerText.textContent = 'lightprey - kiss';
+                    })
+                    .catch(() => {
+                        alert('Файл song.mp3 не найден!');
+                        playerText.textContent = 'Включить музыку';
+                    });
+            } else {
+                music.pause();
+                isPlaying = false;
+                playIcon.textContent = '▶';
+                playerText.textContent = 'Включить музыку';
+            }
+        });
+
+        // =========================================================
+        // РУЛЕТКА
+        // =========================================================
+        let balance = 1000;
+        let currentBet = 50;
+        let winCount = 0;
+        let loseCount = 0;
+        let totalSpins = 0;
+        let bestPercent = 0;
+        let isSpinning = false;
+
+        const balanceDisplay = document.getElementById('balance-display');
+        const roulettePercent = document.getElementById('roulette-percent');
+        const rouletteResult = document.getElementById('roulette-result');
+        const spinBtn = document.getElementById('spin-btn');
+        const spinIndicator = document.getElementById('spin-indicator');
+        const winCountDisplay = document.getElementById('win-count');
+        const loseCountDisplay = document.getElementById('lose-count');
+        const totalSpinsDisplay = document.getElementById('total-spins');
+        const bestPercentDisplay = document.getElementById('best-percent');
+
+        document.querySelectorAll('.bet').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (isSpinning) return;
+                document.querySelectorAll('.bet').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentBet = parseInt(this.dataset.bet);
+            });
+        });
+
+        document.getElementById('reset-balance').addEventListener('click', function() {
+            if (isSpinning) return;
+            balance = 1000;
+            winCount = 0;
+            loseCount = 0;
+            totalSpins = 0;
+            bestPercent = 0;
+            updateBalance();
+            updateStats();
+            rouletteResult.textContent = 'Баланс сброшен!';
+            rouletteResult.className = 'roulette-result info';
+            roulettePercent.className = 'roulette-percent';
+            roulettePercent.textContent = '0%';
+            spinBtn.disabled = false;
+        });
+
+        function updateBalance() {
+            balanceDisplay.textContent = balance + ' монет';
+        }
+
+        function updateStats() {
+            winCountDisplay.textContent = winCount;
+            loseCountDisplay.textContent = loseCount;
+            totalSpinsDisplay.textContent = totalSpins;
+            bestPercentDisplay.textContent = bestPercent + '%';
+        }
+
+        spinBtn.addEventListener('click', function() {
+            if (isSpinning) return;
+            
+            if (balance < currentBet) {
+                rouletteResult.textContent = '❌ Недостаточно монет! Нажми Сброс';
+                rouletteResult.className = 'roulette-result lose';
+                return;
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            spinIndicator.classList.add('active');
+            rouletteResult.textContent = '⏳ КРУЧУ...';
+            rouletteResult.className = 'roulette-result info';
+            roulettePercent.className = 'roulette-percent spinning';
+            roulettePercent.style.color = '#FFD700';
+
+            const finalPercent = Math.floor(Math.random() * 101);
+            let spinCount = 0;
+            const totalSpinSteps = 20 + Math.floor(Math.random() * 10);
+            
+            const spinInterval = setInterval(() => {
+                const randomPercent = Math.floor(Math.random() * 101);
+                roulettePercent.textContent = randomPercent + '%';
+                spinCount++;
+                
+                if (spinCount >= totalSpinSteps) {
+                    clearInterval(spinInterval);
+                    
+                    roulettePercent.textContent = finalPercent + '%';
+                    roulettePercent.classList.remove('spinning');
+                    spinIndicator.classList.remove('active');
+                    
+                    const isWin = finalPercent >= 50;
+                    
+                    if (finalPercent > bestPercent) {
+                        bestPercent = finalPercent;
+                    }
+                    
+                    setTimeout(() => {
+                        if (isWin) {
+                            const winAmount = Math.floor(currentBet * (finalPercent / 100) * 2) + currentBet;
+                            balance += winAmount;
+                            rouletteResult.textContent = '✅ ВЫИГРЫШ! +' + winAmount + ' монет';
+                            rouletteResult.className = 'roulette-result win';
+                            roulettePercent.className = 'roulette-percent win';
+                            winCount++;
+                        } else {
+                            balance -= currentBet;
+                            rouletteResult.textContent = '❌ ПРОИГРЫШ! -' + currentBet + ' монет';
+                            rouletteResult.className = 'roulette-result lose';
+                            roulettePercent.className = 'roulette-percent lose';
+                            loseCount++;
+                        }
+                        
+                        totalSpins++;
+                        updateBalance();
+                        updateStats();
+                        
+                        isSpinning = false;
+                        spinBtn.disabled = false;
+                        
+                        if (balance <= 0) {
+                            balance = 0;
+                            updateBalance();
+                            rouletteResult.textContent = '💀 БАНКРОТ! Нажми Сброс';
+                            rouletteResult.className = 'roulette-result lose';
+                        }
+                    }, 400);
+                }
+            }, 80);
+        });
+
+        // =========================================================
+        // ИГРА DINO
+        // =========================================================
+        const dinoGame = document.getElementById('dino-game');
+        const dino = document.getElementById('dino');
+        const cactus = document.getElementById('cactus');
+        const scoreElement = document.getElementById('score-display');
+        const gameMessage = document.getElementById('game-message');
+        const gameMessageTitle = document.getElementById('game-message-title');
+        const gameMessageSubtitle = document.getElementById('game-message-subtitle');
+        const restartButton = document.getElementById('restart-button');
+
+        let gameStarted = false;
+        let gameOver = false;
+        let jumping = false;
+        let score = 0;
+        let speed = 5;
+        let cactusPosition = -40;
+        let gameLoop;
+        let scoreLoop;
+
+        function resetGame() {
+            gameStarted = false;
+            gameOver = false;
+            jumping = false;
+            score = 0;
+            speed = 5;
+            cactusPosition = -40;
+            scoreElement.textContent = '00000';
+            cactus.style.right = '-40px';
+            dino.classList.remove('jumping');
+            gameMessage.style.display = 'block';
+            gameMessageTitle.textContent = 'Нажми SPACE';
+            gameMessageSubtitle.textContent = 'или кликни по игре, чтобы начать';
+            restartButton.style.display = 'none';
+            clearInterval(gameLoop);
+            clearInterval(scoreLoop);
+        }
+
+        function startGame() {
+            if (gameStarted && !gameOver) return;
+            gameStarted = true;
+            gameOver = false;
+            gameMessage.style.display = 'none';
+            score = 0;
+            speed = 5;
+            cactusPosition = -40;
+            
+            scoreLoop = setInterval(() => {
+                if (!gameOver) {
+                    score++;
+                    scoreElement.textContent = String(score).padStart(5, '0');
+                    if (score % 100 === 0 && speed < 12) {
+                        speed += 0.5;
+                    }
+                }
+            }, 100);
+
+            gameLoop = setInterval(moveGame, 20);
+        }
+
+        function moveGame() {
+            if (gameOver) return;
+            const gameWidth = dinoGame.clientWidth;
+            cactusPosition += speed;
+            if (cactusPosition > gameWidth + 60) {
+                cactusPosition = -40 - Math.random() * 150;
+            }
+            cactus.style.right = cactusPosition + 'px';
+            checkCollision();
+        }
+
+        function jump() {
+            if (gameOver) return;
+            if (!gameStarted) {
+                startGame();
+                setTimeout(() => { doJump(); }, 50);
+                return;
+            }
+            doJump();
+        }
+
+        function doJump() {
+            if (jumping || gameOver) return;
+            jumping = true;
+            dino.classList.remove('jumping');
+            void dino.offsetHeight;
+            dino.classList.add('jumping');
+            setTimeout(() => {
+                jumping = false;
+                dino.classList.remove('jumping');
+            }, 380);
+        }
+
+        function checkCollision() {
+            const dinoRect = dino.getBoundingClientRect();
+            const cactusRect = cactus.getBoundingClientRect();
+            const padding = 8;
+            const collision =
+                dinoRect.right - padding > cactusRect.left &&
+                dinoRect.left + padding < cactusRect.right &&
+                dinoRect.bottom - padding > cactusRect.top &&
+                dinoRect.top + padding < cactusRect.bottom;
+            if (collision) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            if (gameOver) return;
+            gameOver = true;
+            gameStarted = false;
+            clearInterval(gameLoop);
+            clearInterval(scoreLoop);
+            gameMessage.style.display = 'block';
+            gameMessageTitle.textContent = 'GAME OVER';
+            gameMessageSubtitle.textContent = 'Твой счёт: ' + score;
+            restartButton.style.display = 'inline-block';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' || event.code === 'ArrowUp') {
+                event.preventDefault();
+                jump();
+            }
+            if (event.code === 'Enter' && gameOver) {
+                resetGame();
+                startGame();
+            }
+        });
+
+        dinoGame.addEventListener('click', function(event) {
+            if (event.target === restartButton) return;
+            jump();
+        });
+
+        restartButton.addEventListener('click', function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            resetGame();
+            startGame();
+        });
+
+        resetGame();
+    </script>
+</body>
+</html>
